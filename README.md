@@ -28,18 +28,26 @@ Vi forutsetter her at du har installert Node og Git.
 Dette kan du verifisere ved å gå inn i powershell eller terminalen din og skrive `node` eller `git`.
 
 1. Last ned dette repoet.
+
 `git clone git@github.com:osvb/cupassist-update-player-api.git`
+
 2. gå inn i mappen
+
 `cd cupassist-update-player-api`
+
 3. Installer appen med avhengiheter
+
 `npm install`
+
 4. Kjør programmet
+
 `DEBUG="*,-babel,-follow-redirects" PLAYER_API="http://<brukernavn>:<passord>@localhost:9000/players" ./node_modules/.bin/babel-node index.js`
 
 Programmet vil nå starte og hente data fra cupassist og lagre det til en database via spiller apiet.
 
 *OBS:*
 1. Brukernavn og passord må dere spørre om på [slack](osvb.slack.com) da det ikke kan ligge ute tilgjeglig for alle.
+
 2. Evt så kan man sette opp sin eget Spiller API, da bestemmer du passord og brukernavn selv. Les mer på READMEen til [Spiller API](https://github.com/osvb/player-api) for hvordan du gjøre dette.
 
 ## TODO's
