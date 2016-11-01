@@ -3,12 +3,10 @@
 import Rx from 'rxjs/Rx';
 import { map, mergeAll, flatMap } from 'rxjs';
 import { mapTo } from 'rxjs/operator/mapTo';
-import { do } from 'rxjs/operator/do';
 import { concatMap } from 'rxjs/operator/concatMap';
 
 import lodash from 'lodash'
-import isPlayerInPlayerAPI from './api'
-import insertIntoDB from './db'
+import sendToApi from './player-api'
 import getCupassistData from './cupassist'
 import { debugOk, debugError, debugComplete, log } from './helpers'
 
@@ -18,7 +16,7 @@ const delayWithSelector = Rx.Observable.prototype.delayWithSelector;
 
 const Promise = require("bluebird");
 
-const API_URL = "https://api.osvb.no/ranking";
+const CUPASSIST_API = "https://cupassist-api.osvb.no/ranking";
 
 const YEARS= [2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016];
 
@@ -48,11 +46,10 @@ function savePlayers(player) {
 function startProcessing() {
   log('startProcessing')
   Rx.Observable
-    .interval(50)
+    .interval(200)
     .take(players.length)
     .map(i => players[i])
-    .do(insertIntoDB)
-    .subscribe(debugOk, debugError, debugComplete)
+    .subscribe(sendToApi, debugError, debugComplete)
 }
 
 function createDBFormat(groupedObservable) {
@@ -65,7 +62,7 @@ function createDBFormat(groupedObservable) {
         firstName: player.name.split(' ').slice(0, -1).join(" ").trim(),
         lastName: player.name.split(' ').slice(-1).join(" ").trim(),
         externalId: player.cupassistId,
-      },lodash.omit(player, ['year', 'points', 'name', 'cupassistId']))
+      },lodash.omit(player, ['year', 'points', 'name', 'cupassistId', 'url']))
     })
 }
 
@@ -82,7 +79,7 @@ function extractPlayers(response) {
 function populateYearsUrls(year) {
   return {
     year: year,
-    url: `${API_URL}/${year}`
+    url: `${CUPASSIST_API}/${year}`
   }
 }
 
