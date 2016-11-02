@@ -61,6 +61,7 @@ function createDBFormat(groupedObservable) {
       return Object.assign({
         firstName: player.name.split(' ').slice(0, -1).join(" ").trim(),
         lastName: player.name.split(' ').slice(-1).join(" ").trim(),
+        name: player.name,
         externalId: player.cupassistId,
       },lodash.omit(player, ['year', 'points', 'name', 'cupassistId', 'url']))
     })
