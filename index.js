@@ -16,7 +16,11 @@ const delayWithSelector = Rx.Observable.prototype.delayWithSelector;
 
 const Promise = require("bluebird");
 
-const CUPASSIST_API = "https://cupassist-api.osvb.no/ranking";
+if(typeof process.env.CUPASSIST_API === 'undefined' || process.env.CUPASSIST_API === null) {
+  throw new Error('Please set CUPASSIST_API as a env.var');
+}
+
+const CUPASSIST_API = `${process.env.CUPASSIST_API}/ranking`;
 
 const YEARS= [2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016];
 
