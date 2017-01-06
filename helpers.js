@@ -6,6 +6,6 @@ export const debugError = debug('error');
 export const debugOk = debug('ok');
 export const debugComplete = debug('Complete');
 
-export function addField(object, newObject) {
+export function addField(object: Object, newObject: Object) {
   return Object.assign({}, object, newObject);
 }

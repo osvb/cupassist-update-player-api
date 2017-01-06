@@ -3,7 +3,7 @@
 import axios from 'axios'
 import { log, addField } from './helpers';
 
-export default function getCupassistData(object) {
+export default function getCupassistData(object: Object) {
   log('cupassist', object.url);
   return axios
     .get(object.url)
