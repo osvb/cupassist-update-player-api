@@ -1,3 +1,9 @@
+/**
+ * To run this file and import into the database run:
+*        DEBUG="*,-babel,-follow-redirects" CUPASSIST_API="https://api.osvb.no" TOKEN="<insert-token-here>" node_modules/.bin/babel-node graphql-test/add-players.js
+ * from the repos top folder.
+ */
+
 import lodash from "lodash";
 import getCupassistData from "../cupassist";
 import { debugOk, debugError, debugComplete, log } from "../helpers";
