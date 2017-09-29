@@ -73,10 +73,10 @@ function handleTournamentDetails(url, id) {
     const tableData2 = $2("table").parsetable();
 
     const startDate = moment
-      .tz(tableData2[1].join(" "), "MM.DD.YYYY HH.mm", "Europe/Oslo")
+      .tz(tableData2[1].join(" "), "DD.MM.YYYY HH.mm", "Europe/Oslo")
       .format();
     const endDate = moment
-      .tz(tableData2[3].join(" "), "MM.DD.YYYY HH.mm", "Europe/Oslo")
+      .tz(tableData2[3].join(" "), "DD.MM.YYYY HH.mm", "Europe/Oslo")
       .format();
 
     const databaseMutateQuery = createGrafhQlFormat({
@@ -87,6 +87,7 @@ function handleTournamentDetails(url, id) {
       id
     });
 
+    //console.log(databaseMutateQuery, tableData2[1], tableData2[3]);
     mutate(databaseMutateQuery);
   });
 }
