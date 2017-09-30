@@ -26,6 +26,8 @@ type BeachVolleyballTournamentType implements Node {
 const Lokka = require("lokka").Lokka;
 const Transport = require("lokka-transport-http").Transport;
 
+import { mutate } from "./client";
+
 const {
   FIVB_FIVE_POINTS_STARS_POINTS,
   FIVB_FOUR_POINTS_STARS_POINTS,
@@ -54,17 +56,6 @@ const pointsLevels = {
   "FIVB 5 stjerners": FIVB_FIVE_POINTS_STARS_POINTS
 };
 
-const headers = {
-  Authorization: process.env.TOKEN // 'Bearer YOUR_AUTH_TOKEN'
-};
-
-const client = new Lokka({
-  transport: new Transport(
-    "https://api.graph.cool/simple/v1/cj58jidn2nv6d01054i6bqzb7",
-    { headers }
-  )
-});
-
 function main() {
   const keys = Object.keys(pointsLevels);
   const ids = [];
@@ -76,9 +67,8 @@ function main() {
 }
 
 function createBeachVolleyballTournamentType(type) {
-  return client
-    .mutate(
-      `
+  return mutate(
+    `
     {
         createBeachVolleyballTournamentType (
         type: "${type}"
@@ -89,22 +79,20 @@ function createBeachVolleyballTournamentType(type) {
       }
     }
   `
-    )
-    .then(value => {
-      const { id, type } = value.createBeachVolleyballTournamentType;
-      const pointsAndPlaces = pointsLevels[type];
-      pointsAndPlaces.forEach(pointsAndPlaces => {
-        const [place, points] = pointsAndPlaces;
-        createBeachVolleyballRankingStructure(place, points, id);
-      });
+  ).then(value => {
+    const { id, type } = value.createBeachVolleyballTournamentType;
+    const pointsAndPlaces = pointsLevels[type];
+    pointsAndPlaces.forEach(pointsAndPlaces => {
+      const [place, points] = pointsAndPlaces;
+      createBeachVolleyballRankingStructure(place, points, id);
     });
+  });
 }
 
 function createBeachVolleyballRankingStructure(place, points, typeId) {
   console.log(place, points, typeId);
-  return client
-    .mutate(
-      `
+  return client.mutate(
+    `
       {
         createBeachVolleyballRankingStructure (
           points: ${points}
@@ -115,9 +103,7 @@ function createBeachVolleyballRankingStructure(place, points, typeId) {
         }
       }
     `
-    )
-    .then(value => console.log("ok ", value))
-    .catch(err => console.log("err ", err));
+  );
 }
 
 main();

@@ -10,13 +10,15 @@ const client = new Lokka({
 });
 
 export function mutate(string) {
-  console.log("mutating query", string);
-  client
-    .mutate(string)
-    .then(data => console.log("mutating", data))
-    .catch(err => console.log("err", err));
+  return client.mutate(string);
 }
 
 export function query(query, ...args) {
   return client.query(query, ...args);
+}
+
+export function mutateWithLog(string) {
+  mutate(string)
+    .then(data => console.log("mutating", data))
+    .catch(err => console.log("err", err));
 }
