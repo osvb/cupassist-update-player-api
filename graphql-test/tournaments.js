@@ -1,14 +1,16 @@
 import { mutate, query } from "./client";
 
-export function allTournaments() {
-  return query(`
+export async function allTournaments() {
+  const tournamentsResult = await query(`
     {
-        allTournaments() {
+        allBeachVolleyballTournamentses {
             name
             id
-            cuppassistBeachId
-            cuppassistBeachName
+            cupassistBeachName
+            cupassistTournamentId
         }
     }
     `);
+
+  return tournamentsResult.allBeachVolleyballTournamentses;
 }

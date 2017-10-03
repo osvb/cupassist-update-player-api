@@ -19,8 +19,8 @@ export function create(player1, player2) {
     `);
 }
 
-export function allTeams() {
-  return query(`
+export async function allTeams() {
+  const queryResult = query(`
     {
         allTeams() {
             name
@@ -28,18 +28,17 @@ export function allTeams() {
         }
     }
     `);
+  return queryResult.allTeams;
 }
 
 export function teamNavn(player1, player2) {
-  const [first, second] = sort([player1, player2]);
+  const [first, second] = Array.sort([player1, player2]);
   return `${first.firstChar}. ${first.lastname}  - ${second.firstChar}. ${second.lastname} `;
 }
 
 function compareFnPlayer(player1, player2) {
-  return sort(
+  return Array.sort(
     `${player1.lastname} ${player1.firstChar}`,
     `${player2.lastname} ${player2.firstChar}`
   );
 }
-
-sort();

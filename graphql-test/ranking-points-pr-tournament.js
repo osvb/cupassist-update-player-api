@@ -23,9 +23,6 @@ type BeachVolleyballTournamentType implements Node {
 }
 */
 
-const Lokka = require("lokka").Lokka;
-const Transport = require("lokka-transport-http").Transport;
-
 import { mutate } from "./client";
 
 const {

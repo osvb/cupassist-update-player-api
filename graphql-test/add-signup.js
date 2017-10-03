@@ -6,8 +6,9 @@ const superagent = require("superagent");
 const a = superagent.agent();
 const { query, mutate } = require("./client");
 
+import { allTournaments } from "./tournaments";
 import { allTeams, create as createTeam } from "./teams";
-import { create as createSignup } from './signups'
+import { create as createSignup } from "./signups";
 
 const htmlParseOption = {
   normalizeWhitespace: false,
@@ -27,17 +28,24 @@ const mapToTournamentUrl = id =>
 // https://www.profixio.com/pamelding/vis_paamelding.php?tknavn=abt_senior_1_17
 
 async function getAllPlayersByGender() {
-  return query(`{ 
-        females: allPlayers(filter: {gender: FEMALE, cuppassistBeachId: NOT NULL }) {
-          name
-          id
-        }
-        males: allPlayers(filter: {gender: MALE }) {
-          name
-          id
-        }
-      }
-    `);
+  return query(`{
+    females: allPlayers(filter: {AND: [{gender: FEMALE}, {cuppassistBeachId_not: null}]}) {
+      name
+      id
+    }
+    males: allPlayers(filter: {gender: MALE}) {
+      name
+      id
+    }
+  }`)
+    .then(res => {
+      console.log("result ok", res);
+      return res;
+    })
+    .catch(err => {
+      console.log("err", err);
+      return {};
+    });
 }
 
 const splitOnGender = team => team.split(/ \(/);
@@ -99,28 +107,35 @@ const addGraphqlId = (players, signup) => {
   });
 };
 
+main();
+
 async function main() {
   try {
     const playersByGender = await getAllPlayersByGender();
-    const tournaments = await allTournaments()
-    const allTeams = await allTeams();
-    console.log(Object.keys(playersByGender));
+    console.log(playersByGender);
+    const tournaments = await allTournaments();
+    console.log(tournaments);
+    const teams = await allTeams();
+    console.log(teams);
     const males = playersByGender.males.map(mapGraphqlObjectToPlayerObject);
     const females = playersByGender.females.map(mapGraphqlObjectToPlayerObject);
     console.log(males.length, females.length);
 
-    tournaments.forEach(tournament => {
+    for (let tournament of tournaments) {
       const url = mapToTournamentUrl(4319);
+      console.log("url", url);
       const text = await getUrl(url);
+      console.log("text", url);
       const $ = cheerio.load(text);
       const select = $("#lag_choice");
       const teamsAsText = select.text().split(/\n/);
-  
+      console.log("teamsAsText", teamsAsText);
+
       teamsAsText
         .map(splitOnGender)
         .filter(notValidValues)
         .forEach(value => console.log("not valid", value));
-  
+
       // const structurOfsignups = [
       //   { gender: "M|K", team: { firstChar: "S", lastname: "Svendby" } }
       // ];
@@ -129,27 +144,24 @@ async function main() {
         .filter(truthyValue)
         .map(transformToObject)
         .map(splitOnPlayers);
-  
+
       const maleSignups = signups
         .filter(onlyMale)
         .map(addGraphqlId.bind(null, males));
-  
+
       const femaleSignups = signups
         .filter(onlyFemale)
         .map(addGraphqlId.bind(null, females));
-  
+
       const allSignups = femaleSignups.concat(...maleSignups);
-  
+
       const signupsWithTeamId = await enforceTeamId(allSignups);
       signupsWithTeamId.map(createSignup.bind(null, tournament.id));
-    })
-
+    }
   } catch (err) {
     console.log("err", err);
   }
 }
-
-// main();
 
 async function enforceTeamId(signup, allTeams) {
   const teamNameToLookFor = teamNavn(signup.team);
@@ -186,5 +198,3 @@ function trimLeft(text) {
   }
   return text;
 }
-
-co;

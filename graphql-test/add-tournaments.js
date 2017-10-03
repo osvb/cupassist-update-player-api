@@ -72,6 +72,8 @@ function handleTournamentDetails(url, id) {
     cheerioTableparser($2);
     const tableData2 = $2("table").parsetable();
 
+    const cupassistBeachName = 
+
     const startDate = moment
       .tz(tableData2[1].join(" "), "DD.MM.YYYY HH.mm", "Europe/Oslo")
       .format();
@@ -103,6 +105,7 @@ function createGrafhQlFormat({ name, startDate, endDate, type, id } = {}) {
         enddate: "${endDate}"
         typeId: "${mapTypeToId(type)}"
         cupassistTournamentId: "${id}"
+        cupassistBeachName: ${cupassistBeachName}
       ) {
         name
       }
