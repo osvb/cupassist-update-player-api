@@ -1,4 +1,4 @@
-import { mutate, query } from "./client";
+import { mutate, query } from "./../utils/client";
 
 export function create(tournamentId, teamId) {
   // TODO: everyting here

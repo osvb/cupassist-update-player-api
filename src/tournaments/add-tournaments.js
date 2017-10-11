@@ -10,7 +10,7 @@ import cheerioTableparser from "cheerio-tableparser";
 import moment from "moment-timezone";
 const superagent = require("superagent");
 const a = superagent.agent();
-const { mutate } = require("./client");
+const { mutate } = require("../utils/client");
 
 const htmlParseOption = {
   normalizeWhitespace: false,
@@ -43,7 +43,6 @@ function getTournmanetIds(err, res) {
   const $ = cheerio.load(res.text);
   cheerioTableparser($);
   const tableData = $("table").parsetable();
-  console.log(tableData);
 
   const tournamentLinksWithHeader = tableData[ROW_WITH_TOURNAMENT_LINKS];
   const tournamentLinks = tournamentLinksWithHeader.slice(1);
@@ -51,7 +50,6 @@ function getTournmanetIds(err, res) {
     .map(parseIdFromUrl)
     .map(mapToTournamentUrl);
 
-  console.log(tournamentDetailUrls);
   tournamentDetailUrls.forEach(handleTournamentDetails);
   //how to get to the signup page from here?
   // jsdom / selenium? or can i have the same approche and parse out some url I can use?
@@ -61,43 +59,51 @@ main();
 
 function handleTournamentDetails(url, id) {
   a.get(url).end((err, res2) => {
-    const $ = cheerio.load(res2.text);
-    cheerioTableparser($);
-    const tableData = $("table").parsetable();
+    try {
+      const $ = cheerio.load(res2.text);
 
-    const name = tableData[1][1];
-    const type = tableData[3][7];
+      cheerioTableparser($);
+      const tableData = $("table").parsetable();
 
-    const $2 = cheerio.load(tableData[1][4]);
-    cheerioTableparser($2);
-    const tableData2 = $2("table").parsetable();
+      const name = tableData[1][1];
+      const type = tableData[3][7];
 
-    const cupassistBeachName = 
+      const $2 = cheerio.load(tableData[1][4]);
+      cheerioTableparser($2);
+      const tableData2 = $2("table").parsetable();
 
-    const startDate = moment
-      .tz(tableData2[1].join(" "), "DD.MM.YYYY HH.mm", "Europe/Oslo")
-      .format();
-    const endDate = moment
-      .tz(tableData2[3].join(" "), "DD.MM.YYYY HH.mm", "Europe/Oslo")
-      .format();
+      const cupassistBeachName = parseTournamentNameFromText(res2.text);
 
-    const databaseMutateQuery = createGrafhQlFormat({
-      name,
-      startDate,
-      endDate,
-      type,
-      id
-    });
+      const startDate = moment
+        .tz(tableData2[1].join(" "), "DD.MM.YYYY HH.mm", "Europe/Oslo")
+        .format();
+      const endDate = moment
+        .tz(tableData2[3].join(" "), "DD.MM.YYYY HH.mm", "Europe/Oslo")
+        .format();
 
-    //console.log(databaseMutateQuery, tableData2[1], tableData2[3]);
-    mutate(databaseMutateQuery);
+      const databaseMutateQuery = createGrafhQlFormat({
+        name,
+        startDate,
+        endDate,
+        type,
+        id,
+        cupassistBeachName
+      });
+
+      //console.log(databaseMutateQuery, tableData2[1], tableData2[3]);
+      mutate(databaseMutateQuery);
+    } catch (err) {
+      console.log("Failed for ID:", id);
+    }
   });
 }
 
 // Virker:
 // https://www.profixio.com/resultater/vis_oppsett.php?id=4319
 
-function createGrafhQlFormat({ name, startDate, endDate, type, id } = {}) {
+function createGrafhQlFormat(
+  { name, startDate, endDate, type, id, cupassistBeachName } = {}
+) {
   return `{
       createBeachVolleyballTournaments (
         name: "${name}"
@@ -105,7 +111,7 @@ function createGrafhQlFormat({ name, startDate, endDate, type, id } = {}) {
         enddate: "${endDate}"
         typeId: "${mapTypeToId(type)}"
         cupassistTournamentId: "${id}"
-        cupassistBeachName: ${cupassistBeachName}
+        cupassistBeachName: "${cupassistBeachName}"
       ) {
         name
       }
@@ -134,4 +140,11 @@ function mapTypeToId(cupassistType) {
 
   ("cj82lrxgometo0143mv2b98gz");
   //NT Master
+}
+
+function parseTournamentNameFromText(doc) {
+  const index = doc.search(/tknavn=/);
+  const startTkName = doc.slice(index + 7);
+  const tkname = startTkName.split('"', 1);
+  return tkname[0];
 }

@@ -1,9 +1,7 @@
-/* @flow */
-
 import axios from 'axios'
 import { log, addField } from './helpers';
 
-export default function getCupassistData(object: Object) {
+export default function getCupassistData(object) {
   log('cupassist', object.url);
   return axios
     .get(object.url)

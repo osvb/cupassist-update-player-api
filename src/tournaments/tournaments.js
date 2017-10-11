@@ -1,4 +1,4 @@
-import { mutate, query } from "./client";
+import { mutate, query } from "./../utils/client";
 
 export async function allTournaments() {
   const tournamentsResult = await query(`

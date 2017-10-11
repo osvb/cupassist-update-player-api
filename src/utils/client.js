@@ -1,10 +1,13 @@
-const Lokka = require("lokka").Lokka;
-const Transport = require("lokka-transport-http").Transport;
+import LokkaExport from "lokka"
+import lokkaTransportHttp from "lokka-transport-http"
+
+const Lokka = LokkaExport.Lokka
+const Transport = lokkaTransportHttp.Transport
 
 const headers = {
   Authorization: process.env.TOKEN // 'Bearer YOUR_AUTH_TOKEN'
 };
-
+console.log("process.env.GRAPHQL_SERVER", process.env.GRAPHQL_SERVER);
 const client = new Lokka({
   transport: new Transport(process.env.GRAPHQL_SERVER, { headers })
 });

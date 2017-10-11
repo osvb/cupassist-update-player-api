@@ -1,4 +1,4 @@
-import { query, mutate } from "./client";
+import { query, mutate } from "../utils/client";
 
 query(`
 { 

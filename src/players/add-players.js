@@ -5,10 +5,12 @@
  */
 
 import lodash from "lodash";
-import getCupassistData from "../cupassist";
-import { debugOk, debugError, debugComplete, log } from "../helpers";
-const Promise = require("bluebird");
-const { mutate } = require("./client");
+import Promise from "bluebird";
+
+import getCupassistData from "../../cupassist";
+import { debugOk, debugError, debugComplete, log } from "../../helpers";
+import { mutate } from "./../utils/client";
+import { addPlayer } from './players'
 
 if (
   typeof process.env.CUPASSIST_API === "undefined" ||
@@ -35,11 +37,11 @@ function main() {
       const players = lodash.flatten(
         datas.filter(object => object !== null).map(extractPlayers)
       );
-      const dbFormat = players.map(createDBFormat).map(createGrafhQlFormat);
-      console.log("Lengde:", dbFormat.length);
-      dbFormat.forEach(format => {
-        mutate(format);
-      });
+      const dbFormat = players.map(createDBFormat);
+      for(let index in dbFormat) {
+        const player = dbFormat[index]
+        await addPlayer(player)
+      }
     })
     .catch(err => console.log("request failed", err));
 }
@@ -80,42 +82,3 @@ function populateGenderUrls(object) {
   ];
 }
 
-function createGrafhQlFormat(
-  {
-    name,
-    gender,
-    number = 1,
-    position = "Ukjent",
-    height = 0,
-    reach = 0,
-    blockReach = 0,
-    birthYear = 0,
-    active = true,
-    cuppassistBeachId = "",
-    image
-  } = {}
-) {
-  if (!name || !gender) {
-    throw new Error("name or gender is not valid");
-  }
-  return `{
-    createPlayer (
-        gender: ${gender}
-        number: ${number}
-        name: "${name}"
-        position: "${position}"
-        height: ${height}
-        reach: ${reach}
-        blockReach: ${blockReach}
-        birthYear: ${birthYear}
-        active: ${active} ${image
-    ? `
-        image: ${image}`
-    : ""}
-        cuppassistBeachId: "${cuppassistBeachId}"
-    ) {
-      name
-    }
-  }
-   `;
-}

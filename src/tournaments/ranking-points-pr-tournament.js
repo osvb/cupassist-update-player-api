@@ -23,7 +23,7 @@ type BeachVolleyballTournamentType implements Node {
 }
 */
 
-import { mutate } from "./client";
+import { mutate } from "../utils/client";
 
 const {
   FIVB_FIVE_POINTS_STARS_POINTS,
